@@ -1,0 +1,96 @@
+{
+  "baseline": {
+    "accuracy": 0.93,
+    "precision": 0.96,
+    "recall": 0.8823529411764706,
+    "f1": 0.9195402298850575,
+    "auc_roc": 0.9812141319942612,
+    "confusion_matrix": [
+      [
+        159,
+        5
+      ],
+      [
+        16,
+        120
+      ]
+    ],
+    "total_params": 69762,
+    "active_params": 69762,
+    "memory_mb": 0.2691,
+    "inference_ms": 7.8852,
+    "inference_std_ms": 2.0013
+  },
+  "dsr": {
+    "accuracy": 0.93,
+    "precision": 0.9389312977099237,
+    "recall": 0.9044117647058824,
+    "f1": 0.9213483146067416,
+    "auc_roc": 0.9757890961262554,
+    "confusion_matrix": [
+      [
+        156,
+        8
+      ],
+      [
+        13,
+        123
+      ]
+    ],
+    "total_params": 69762,
+    "active_params": 69762,
+    "memory_mb": 0.2691,
+    "inference_ms": 8.0134,
+    "inference_std_ms": 1.6885
+  },
+  "slide_compact": {
+    "accuracy": 0.92,
+    "precision": 0.9375,
+    "recall": 0.8823529411764706,
+    "f1": 0.9090909090909091,
+    "auc_roc": 0.9745337159253945,
+    "confusion_matrix": [
+      [
+        156,
+        8
+      ],
+      [
+        16,
+        120
+      ]
+    ],
+    "total_params": 25614,
+    "active_params": 25614,
+    "memory_mb": 0.0995,
+    "inference_ms": 8.7548,
+    "inference_std_ms": 0.975
+  },
+  "param_compression": 2.7235886624502226,
+  "memory_compression": 2.7045226130653264,
+  "speedup": 0.9006716315621146,
+  "config": {
+    "data_root": "./data/simulated",
+    "num_graphs": 2000,
+    "min_nodes": 20,
+    "max_nodes": 200,
+    "batch_size": 64,
+    "hidden_channels": 128,
+    "num_gcn_layers": 3,
+    "dropout": 0.5,
+    "skip_baseline": false,
+    "baseline_epochs": 100,
+    "lr": 0.001,
+    "shortcut_ratio": 0.1,
+    "k_eigen": 50,
+    "epsilon": 0.3,
+    "prune_ratio": 0.4,
+    "prune_strategy": "magnitude_random",
+    "slide_epochs": 100,
+    "slide_lr": 0.001,
+    "lambda_decorr": 0.01,
+    "rff_dim": 256,
+    "slide_patience": 15,
+    "device": "cuda",
+    "seed": 42
+  }
+}
