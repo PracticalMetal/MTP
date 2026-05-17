@@ -1,0 +1,146 @@
+[Data] Nodes: 5000 | Edges: 129974 | Attack: 1500 (30%)
+[Data] Homophilic edges: 22996 | Noisy cross-class: 34492 | Tree: 4999
+[Data] Train: 3000 | Val: 1000 | Test: 1000
+
+[LE Study] Graph: 5000 nodes, 129,974 edges, feature dim 21
+[LE Study] Noise edge ratio: 0.6, target sparsity: 0.5
+
+======================================================================
+  ATTACK-LABEL FRACTION = 100%
+======================================================================
+
+  [seed 0] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9374 | AUC=0.9936 (25.9s)
+    Pruning (class-conditional):   F1=0.8540 | AUC=0.9699 | sparsity=50.00% (40.9s)
+    Pruning (full AE, ablation):   F1=0.6877 | AUC=0.8739 | sparsity=50.00% (35.2s)
+    NeuralSparse:                  F1=0.7337 | AUC=0.8666 | sparsity=50.00% (30.0s)
+    DropEdge (fixed-random):       F1=0.7900 | AUC=0.9512 | sparsity=50.00% (23.8s)
+
+  [seed 1] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9489 | AUC=0.9940 (27.0s)
+    Pruning (class-conditional):   F1=0.5907 | AUC=0.7983 | sparsity=50.00% (29.6s)
+    Pruning (full AE, ablation):   F1=0.7808 | AUC=0.9290 | sparsity=50.00% (32.9s)
+    NeuralSparse:                  F1=0.6314 | AUC=0.8110 | sparsity=50.00% (29.9s)
+    DropEdge (fixed-random):       F1=0.7758 | AUC=0.9479 | sparsity=50.00% (30.1s)
+
+  [seed 2] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9401 | AUC=0.9921 (22.1s)
+    Pruning (class-conditional):   F1=0.7849 | AUC=0.9413 | sparsity=50.00% (37.9s)
+    Pruning (full AE, ablation):   F1=0.6166 | AUC=0.7810 | sparsity=50.00% (33.9s)
+    NeuralSparse:                  F1=0.6184 | AUC=0.7697 | sparsity=50.00% (30.2s)
+    DropEdge (fixed-random):       F1=0.7854 | AUC=0.9534 | sparsity=50.00% (39.2s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 50%
+======================================================================
+
+  [seed 0] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9451 | AUC=0.9934 (28.4s)
+    Pruning (class-conditional):   F1=0.8374 | AUC=0.9636 | sparsity=50.00% (35.7s)
+    Pruning (full AE, ablation):   F1=0.6968 | AUC=0.8753 | sparsity=50.00% (35.1s)
+    NeuralSparse:                  F1=0.6897 | AUC=0.8429 | sparsity=50.00% (30.4s)
+    DropEdge (fixed-random):       F1=0.7920 | AUC=0.9484 | sparsity=50.00% (30.3s)
+
+  [seed 1] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9340 | AUC=0.9929 (21.7s)
+    Pruning (class-conditional):   F1=0.6152 | AUC=0.8202 | sparsity=50.00% (29.0s)
+    Pruning (full AE, ablation):   F1=0.9313 | AUC=0.9906 | sparsity=50.00% (95.0s)
+    NeuralSparse:                  F1=0.6181 | AUC=0.7918 | sparsity=50.00% (30.6s)
+    DropEdge (fixed-random):       F1=0.8121 | AUC=0.9476 | sparsity=50.00% (30.9s)
+
+  [seed 2] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9307 | AUC=0.9921 (22.2s)
+    Pruning (class-conditional):   F1=0.7798 | AUC=0.9385 | sparsity=50.00% (38.1s)
+    Pruning (full AE, ablation):   F1=0.6073 | AUC=0.7867 | sparsity=50.00% (32.2s)
+    NeuralSparse:                  F1=0.6273 | AUC=0.7920 | sparsity=50.00% (28.6s)
+    DropEdge (fixed-random):       F1=0.8063 | AUC=0.9457 | sparsity=50.00% (26.1s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 25%
+======================================================================
+
+  [seed 0] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9340 | AUC=0.9928 (24.3s)
+    Pruning (class-conditional):   F1=0.8180 | AUC=0.9597 | sparsity=50.00% (38.6s)
+    Pruning (full AE, ablation):   F1=0.7083 | AUC=0.8714 | sparsity=50.00% (36.9s)
+    NeuralSparse:                  F1=0.7360 | AUC=0.8632 | sparsity=50.00% (30.8s)
+    DropEdge (fixed-random):       F1=0.7985 | AUC=0.9370 | sparsity=50.00% (39.9s)
+
+  [seed 1] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9374 | AUC=0.9925 (27.2s)
+    Pruning (class-conditional):   F1=0.6147 | AUC=0.8100 | sparsity=50.00% (28.6s)
+    Pruning (full AE, ablation):   F1=0.7343 | AUC=0.9073 | sparsity=50.00% (37.4s)
+    NeuralSparse:                  F1=0.6165 | AUC=0.8028 | sparsity=50.00% (30.5s)
+    DropEdge (fixed-random):       F1=0.7383 | AUC=0.8977 | sparsity=50.00% (15.7s)
+
+  [seed 2] using 228/912 train attack labels
+    Dense GCN:                     F1=0.8897 | AUC=0.9927 (22.6s)
+    Pruning (class-conditional):   F1=0.7764 | AUC=0.9376 | sparsity=50.00% (38.3s)
+    Pruning (full AE, ablation):   F1=0.5839 | AUC=0.7715 | sparsity=50.00% (33.8s)
+    NeuralSparse:                  F1=0.5997 | AUC=0.7680 | sparsity=50.00% (30.5s)
+    DropEdge (fixed-random):       F1=0.7621 | AUC=0.9433 | sparsity=50.00% (37.1s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 10%
+======================================================================
+
+  [seed 0] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9220 | AUC=0.9932 (26.0s)
+    Pruning (class-conditional):   F1=0.8372 | AUC=0.9611 | sparsity=50.00% (40.3s)
+    Pruning (full AE, ablation):   F1=0.6910 | AUC=0.8586 | sparsity=50.00% (37.1s)
+    NeuralSparse:                  F1=0.6993 | AUC=0.8440 | sparsity=50.00% (29.9s)
+    DropEdge (fixed-random):       F1=0.7866 | AUC=0.9307 | sparsity=50.00% (19.3s)
+
+  [seed 1] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9154 | AUC=0.9935 (23.4s)
+    Pruning (class-conditional):   F1=0.6263 | AUC=0.8168 | sparsity=50.00% (28.9s)
+    Pruning (full AE, ablation):   F1=0.7072 | AUC=0.8767 | sparsity=50.00% (34.3s)
+    NeuralSparse:                  F1=0.5613 | AUC=0.7381 | sparsity=50.00% (28.3s)
+    DropEdge (fixed-random):       F1=0.8014 | AUC=0.9369 | sparsity=50.00% (23.5s)
+
+  [seed 2] using 91/912 train attack labels
+    Dense GCN:                     F1=0.8544 | AUC=0.9922 (29.8s)
+    Pruning (class-conditional):   F1=0.7733 | AUC=0.9267 | sparsity=50.00% (40.2s)
+    Pruning (full AE, ablation):   F1=0.6187 | AUC=0.8063 | sparsity=50.00% (33.6s)
+    NeuralSparse:                  F1=0.6749 | AUC=0.8250 | sparsity=50.00% (29.1s)
+    DropEdge (fixed-random):       F1=0.7520 | AUC=0.9401 | sparsity=50.00% (35.6s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 5%
+======================================================================
+
+  [seed 0] using 46/912 train attack labels
+    Dense GCN:                     F1=0.9017 | AUC=0.9920 (26.0s)
+    Pruning (class-conditional):   F1=0.7857 | AUC=0.9431 | sparsity=50.00% (40.7s)
+    Pruning (full AE, ablation):   F1=0.6764 | AUC=0.8630 | sparsity=50.00% (37.2s)
+    NeuralSparse:                  F1=0.7049 | AUC=0.8515 | sparsity=50.00% (32.2s)
+    DropEdge (fixed-random):       F1=0.7767 | AUC=0.9271 | sparsity=50.00% (23.1s)
+
+  [seed 1] using 46/912 train attack labels
+    Dense GCN:                     F1=0.4520 | AUC=0.9869 (9.6s)
+    Pruning (class-conditional):   F1=0.6775 | AUC=0.8364 | sparsity=50.00% (26.2s)
+    Pruning (full AE, ablation):   F1=0.7582 | AUC=0.8993 | sparsity=50.00% (36.9s)
+    NeuralSparse:                  F1=0.5495 | AUC=0.7463 | sparsity=50.00% (28.0s)
+    DropEdge (fixed-random):       F1=0.7490 | AUC=0.9402 | sparsity=50.00% (24.6s)
+
+  [seed 2] using 46/912 train attack labels
+    Dense GCN:                     F1=0.8431 | AUC=0.9924 (23.7s)
+    Pruning (class-conditional):   F1=0.7619 | AUC=0.9107 | sparsity=50.00% (40.2s)
+    Pruning (full AE, ablation):   F1=0.6415 | AUC=0.8187 | sparsity=50.00% (33.7s)
+    NeuralSparse:                  F1=0.5794 | AUC=0.7462 | sparsity=50.00% (30.7s)
+    DropEdge (fixed-random):       F1=0.6860 | AUC=0.9236 | sparsity=50.00% (20.5s)
+
+======================================================================
+  AGGREGATED RESULTS (mean ± std over seeds)
+======================================================================
+
+  Fraction |          Dense |       DropEdge |   NeuralSparse |  Ours (cls-cond) |        Full AE
+  ------------------------------------------------------------------------------------------------
+      1.00 |  0.942 ± 0.005 |  0.784 ± 0.006 |  0.661 ± 0.052 |  0.743 ± 0.111 |  0.695 ± 0.067
+      0.50 |  0.937 ± 0.006 |  0.803 ± 0.008 |  0.645 ± 0.032 |  0.744 ± 0.094 |  0.745 ± 0.137
+      0.25 |  0.920 ± 0.022 |  0.766 ± 0.025 |  0.651 ± 0.061 |  0.736 ± 0.088 |  0.676 ± 0.066
+      0.10 |  0.897 ± 0.030 |  0.780 ± 0.021 |  0.645 ± 0.060 |  0.746 ± 0.088 |  0.672 ± 0.038
+      0.05 |  0.732 ± 0.200 |  0.737 ± 0.038 |  0.611 ± 0.067 |  0.742 ± 0.046 |  0.692 ± 0.049
+
+[LE Study] Saved results to results/label_efficiency.json
+[LE Study] Plot: results/label_efficiency.png

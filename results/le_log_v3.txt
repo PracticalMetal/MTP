@@ -1,0 +1,166 @@
+[Data] Nodes: 5000 | Edges: 129974 | Attack: 1500 (30%)
+[Data] Homophilic edges: 22996 | Noisy cross-class: 34492 | Tree: 4999
+[Data] Train: 3000 | Val: 1000 | Test: 1000
+
+[LE Study] Graph: 5000 nodes, 129,974 edges, feature dim 21
+[LE Study] Noise edge ratio: 0.6, target sparsity: 0.5
+
+======================================================================
+  ATTACK-LABEL FRACTION = 100%
+======================================================================
+
+  [seed 0] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9374 | AUC=0.9936 (2.8s)
+    Pruning (class-conditional):   F1=0.8540 | AUC=0.9699 | sparsity=50.00% (4.0s)
+    Pruning (full AE, ablation):   F1=0.6877 | AUC=0.8739 | sparsity=50.00% (3.1s)
+
+  [seed 1] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9487 | AUC=0.9940 (2.1s)
+    Pruning (class-conditional):   F1=0.5907 | AUC=0.7983 | sparsity=50.00% (2.6s)
+    Pruning (full AE, ablation):   F1=0.7808 | AUC=0.9290 | sparsity=50.00% (3.3s)
+
+  [seed 2] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9401 | AUC=0.9921 (2.0s)
+    Pruning (class-conditional):   F1=0.7849 | AUC=0.9412 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.6166 | AUC=0.7810 | sparsity=50.00% (2.9s)
+
+  [seed 3] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9281 | AUC=0.9920 (1.7s)
+    Pruning (class-conditional):   F1=0.9400 | AUC=0.9883 | sparsity=50.00% (8.7s)
+    Pruning (full AE, ablation):   F1=0.9231 | AUC=0.9871 | sparsity=50.00% (8.9s)
+
+  [seed 4] using 912/912 train attack labels
+    Dense GCN:                     F1=0.9412 | AUC=0.9943 (1.8s)
+    Pruning (class-conditional):   F1=0.7858 | AUC=0.9344 | sparsity=50.00% (3.3s)
+    Pruning (full AE, ablation):   F1=0.9329 | AUC=0.9902 | sparsity=50.00% (8.6s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 50%
+======================================================================
+
+  [seed 0] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9395 | AUC=0.9935 (2.0s)
+    Pruning (class-conditional):   F1=0.8366 | AUC=0.9674 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.7057 | AUC=0.8787 | sparsity=50.00% (3.2s)
+
+  [seed 1] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9340 | AUC=0.9929 (1.7s)
+    Pruning (class-conditional):   F1=0.6170 | AUC=0.8202 | sparsity=50.00% (2.4s)
+    Pruning (full AE, ablation):   F1=0.9292 | AUC=0.9838 | sparsity=50.00% (8.7s)
+
+  [seed 2] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9307 | AUC=0.9921 (1.8s)
+    Pruning (class-conditional):   F1=0.7798 | AUC=0.9385 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.6073 | AUC=0.7868 | sparsity=50.00% (2.8s)
+
+  [seed 3] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9147 | AUC=0.9926 (2.0s)
+    Pruning (class-conditional):   F1=0.8462 | AUC=0.9487 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.9310 | AUC=0.9862 | sparsity=50.00% (8.8s)
+
+  [seed 4] using 456/912 train attack labels
+    Dense GCN:                     F1=0.9489 | AUC=0.9936 (1.7s)
+    Pruning (class-conditional):   F1=0.7812 | AUC=0.9298 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.7454 | AUC=0.8983 | sparsity=50.00% (3.5s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 25%
+======================================================================
+
+  [seed 0] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9340 | AUC=0.9928 (2.0s)
+    Pruning (class-conditional):   F1=0.8187 | AUC=0.9597 | sparsity=50.00% (3.3s)
+    Pruning (full AE, ablation):   F1=0.7083 | AUC=0.8714 | sparsity=50.00% (3.3s)
+
+  [seed 1] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9374 | AUC=0.9925 (2.2s)
+    Pruning (class-conditional):   F1=0.6126 | AUC=0.8101 | sparsity=50.00% (2.5s)
+    Pruning (full AE, ablation):   F1=0.7343 | AUC=0.9072 | sparsity=50.00% (3.3s)
+
+  [seed 2] using 228/912 train attack labels
+    Dense GCN:                     F1=0.8897 | AUC=0.9927 (1.8s)
+    Pruning (class-conditional):   F1=0.7764 | AUC=0.9376 | sparsity=50.00% (3.3s)
+    Pruning (full AE, ablation):   F1=0.5846 | AUC=0.7718 | sparsity=50.00% (3.0s)
+
+  [seed 3] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9098 | AUC=0.9930 (2.7s)
+    Pruning (class-conditional):   F1=0.8438 | AUC=0.9530 | sparsity=50.00% (3.6s)
+    Pruning (full AE, ablation):   F1=0.9287 | AUC=0.9833 | sparsity=50.00% (8.6s)
+
+  [seed 4] using 228/912 train attack labels
+    Dense GCN:                     F1=0.9391 | AUC=0.9945 (2.8s)
+    Pruning (class-conditional):   F1=0.7536 | AUC=0.9063 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.7291 | AUC=0.8958 | sparsity=50.00% (3.4s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 10%
+======================================================================
+
+  [seed 0] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9220 | AUC=0.9932 (2.0s)
+    Pruning (class-conditional):   F1=0.8347 | AUC=0.9610 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.6910 | AUC=0.8586 | sparsity=50.00% (3.2s)
+
+  [seed 1] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9154 | AUC=0.9935 (2.0s)
+    Pruning (class-conditional):   F1=0.6273 | AUC=0.8167 | sparsity=50.00% (2.5s)
+    Pruning (full AE, ablation):   F1=0.7072 | AUC=0.8766 | sparsity=50.00% (3.0s)
+
+  [seed 2] using 91/912 train attack labels
+    Dense GCN:                     F1=0.8521 | AUC=0.9921 (2.4s)
+    Pruning (class-conditional):   F1=0.7733 | AUC=0.9267 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.6187 | AUC=0.8063 | sparsity=50.00% (2.9s)
+
+  [seed 3] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9009 | AUC=0.9931 (2.9s)
+    Pruning (class-conditional):   F1=0.8321 | AUC=0.9521 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.8717 | AUC=0.9664 | sparsity=50.00% (3.8s)
+
+  [seed 4] using 91/912 train attack labels
+    Dense GCN:                     F1=0.9171 | AUC=0.9943 (3.0s)
+    Pruning (class-conditional):   F1=0.7586 | AUC=0.9271 | sparsity=50.00% (3.4s)
+    Pruning (full AE, ablation):   F1=0.7188 | AUC=0.8830 | sparsity=50.00% (3.3s)
+
+======================================================================
+  ATTACK-LABEL FRACTION = 5%
+======================================================================
+
+  [seed 0] using 46/912 train attack labels
+    Dense GCN:                     F1=0.9017 | AUC=0.9920 (2.1s)
+    Pruning (class-conditional):   F1=0.7843 | AUC=0.9429 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.6764 | AUC=0.8630 | sparsity=50.00% (3.2s)
+
+  [seed 1] using 46/912 train attack labels
+    Dense GCN:                     F1=0.4520 | AUC=0.9869 (0.8s)
+    Pruning (class-conditional):   F1=0.6775 | AUC=0.8364 | sparsity=50.00% (2.9s)
+    Pruning (full AE, ablation):   F1=0.7582 | AUC=0.8993 | sparsity=50.00% (3.2s)
+
+  [seed 2] using 46/912 train attack labels
+    Dense GCN:                     F1=0.8431 | AUC=0.9924 (2.0s)
+    Pruning (class-conditional):   F1=0.7619 | AUC=0.9109 | sparsity=50.00% (3.5s)
+    Pruning (full AE, ablation):   F1=0.6415 | AUC=0.8187 | sparsity=50.00% (2.9s)
+
+  [seed 3] using 46/912 train attack labels
+    Dense GCN:                     F1=0.9220 | AUC=0.9916 (2.2s)
+    Pruning (class-conditional):   F1=0.8106 | AUC=0.9394 | sparsity=50.00% (3.6s)
+    Pruning (full AE, ablation):   F1=0.8427 | AUC=0.9599 | sparsity=50.00% (3.9s)
+
+  [seed 4] using 46/912 train attack labels
+    Dense GCN:                     F1=0.8968 | AUC=0.9937 (2.7s)
+    Pruning (class-conditional):   F1=0.7305 | AUC=0.9014 | sparsity=50.00% (3.3s)
+    Pruning (full AE, ablation):   F1=0.6788 | AUC=0.8631 | sparsity=50.00% (3.4s)
+
+======================================================================
+  AGGREGATED RESULTS (mean ± std over seeds)
+======================================================================
+
+    Fraction |         Dense GCN F1 |     Ours (cls-cond) F1 |   Pruning (full AE) F1
+  --------------------------------------------------------------------------------------
+        1.00 |     0.9391 ± 0.0067 |       0.7911 ± 0.1152 |       0.7882 ± 0.1255
+        0.50 |     0.9336 ± 0.0113 |       0.7722 ± 0.0823 |       0.7837 ± 0.1277
+        0.25 |     0.9220 ± 0.0193 |       0.7610 ± 0.0806 |       0.7370 ± 0.1103
+        0.10 |     0.9015 ± 0.0257 |       0.7652 ± 0.0754 |       0.7215 ± 0.0828
+        0.05 |     0.8031 ± 0.1775 |       0.7530 ± 0.0460 |       0.7195 ± 0.0725
+
+[LE Study] Saved results to results/label_efficiency.json
+[LE Study] Plot: results/label_efficiency.png

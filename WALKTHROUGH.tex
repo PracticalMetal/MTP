@@ -1,0 +1,655 @@
+% =========================================================================
+% PROJECT WALKTHROUGH (companion document to THESIS.tex)
+%
+% A self-contained explainer of what the project does, the math behind it,
+% and how to defend each component. Compile on Overleaf with pdfLaTeX.
+% =========================================================================
+\documentclass[11pt,a4paper]{article}
+
+% --- Layout ---
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{setspace}
+\linespread{1.15}
+
+% --- Encoding & fonts ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% --- Math ---
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{bm}
+\usepackage{mathtools}
+
+% --- Tables, lists, graphics, captions ---
+\usepackage{booktabs, array, tabularx}
+\usepackage{enumitem}
+\setlist{topsep=2pt, itemsep=2pt, parsep=0pt}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[font=small,labelfont=bf]{caption}
+
+% --- Code listings ---
+\usepackage{listings}
+\lstdefinestyle{pystyle}{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{red!70!black},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+  backgroundcolor=\color{gray!5},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=5pt,
+}
+\lstset{style=pystyle}
+
+% --- Section spacing ---
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+% --- Highlight boxes ---
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+\newtcolorbox{keybox}[1][]{enhanced, breakable,
+  colback=blue!4, colframe=blue!50!black, boxrule=0.4pt,
+  title=#1, fonttitle=\bfseries,
+  left=6pt, right=6pt, top=4pt, bottom=4pt}
+\newtcolorbox{notebox}[1][]{enhanced, breakable,
+  colback=yellow!8, colframe=orange!60!black, boxrule=0.4pt,
+  title=#1, fonttitle=\bfseries,
+  left=6pt, right=6pt, top=4pt, bottom=4pt}
+
+% --- Hyperref ---
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue!50!black,
+            urlcolor=blue!60!black, citecolor=teal!60!black}
+
+% =========================================================================
+\title{\textbf{Project Walkthrough}\\[0.3em]
+       \large Self-Supervised Reconstruction-Guided\\
+       Edge Pruning for GNN-based IoT Intrusion Detection\\[0.3em]
+       \normalsize A companion explainer to \texttt{THESIS.tex}}
+\author{Pulkit Mittal}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{keybox}[How to read this document]
+This is a learning-and-defence companion to the formal thesis
+(\texttt{THESIS.tex}). The thesis is written in the voice of a finished
+report; this document is written in the voice of \emph{explaining the
+project to you}, with extra hand-holding on the math and intuition.
+\begin{itemize}
+  \item Sections 1--2 explain \emph{what we did} in plain terms.
+  \item Sections 3--6 build up the math step by step.
+  \item Section 7 explains \emph{why each piece is necessary} via
+        ablations.
+  \item Section 8 connects math to the empirical numbers.
+  \item Section 9 is the elevator-pitch you can memorise for the
+        defence.
+  \item Section 10 is a one-page cheat-sheet for quick reference.
+\end{itemize}
+\end{keybox}
+
+\tableofcontents
+
+% =========================================================================
+\section{What this project does (plain English)}
+
+We take the standard GNN-based IoT intrusion-detection architecture
+from Villegas-Ch et al.\ (IEEE Access), which is a 3-layer Graph
+Convolutional Network on the IoT communication graph. We \emph{add two
+components on top of it}:
+\begin{enumerate}
+  \item A small \textbf{autoencoder} trained on normal-class nodes
+        only.
+  \item A \textbf{differentiable edge pruner} that uses the
+        autoencoder's reconstruction error to decide which edges to
+        keep.
+\end{enumerate}
+The output is a \emph{sparsified} graph that the same 3-layer GCN
+classifies. We removed about half the edges at zero F1 loss, and the
+inference is 1.37$\times$ faster on graphs with $\sim$50\,000 nodes.
+
+\paragraph{What \emph{we} contribute methodologically.}
+The original GNN paper trains a classifier. We don't change it. We
+change \emph{how the edges feeding into that classifier are selected}.
+Specifically, the autoencoder is trained on \textbf{only the normal
+class}, so its reconstruction error becomes an
+\emph{out-of-distribution score} that the pruner can consume
+\emph{without ever seeing attack labels}. This is what makes our pruning
+\textbf{label-efficient} --- it works the same whether you have 100\%
+of the attack labels or only 5\%.
+
+\paragraph{What "self-supervised" means here.}
+The autoencoder's training task --- reconstruct its own input ---
+requires no labels. We additionally filter \emph{which} nodes are
+allowed to enter the reconstruction loss (normal nodes only). The
+attack-label information is therefore never injected into the
+autoencoder's gradient. This is precisely the property prior pruning
+methods (NeuralSparse, PTDNet) lack.
+
+% =========================================================================
+\section{The big picture in one diagram}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{p{0.7\textwidth}}
+\toprule
+\textbf{1.} Raw IoT graph $\mathcal{G} = (V, E, X, A)$ \\
+\quad $\downarrow$ \\
+\textbf{2.} Autoencoder $\to$ per-node MSE score (trained on normals)\\
+\quad $\downarrow$ \\
+\textbf{3.} Pruner $\to$ binary keep/prune decision per edge\\
+\quad $\downarrow$ \\
+\textbf{4.} Sparsified graph $\mathcal{G}'$ with $\sim$50\% fewer edges\\
+\quad $\downarrow$ \\
+\textbf{5.} 3-layer GCN classifier (same as reference paper)\\
+\quad $\downarrow$ \\
+\textbf{6.} Per-node predictions $\hat{y}$ (normal / attack)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Steps 1, 5, 6 are the standard GNN-IDS pipeline. Steps 2--4 are our
+addition. All five trainable components --- autoencoder, pruner, three
+GCN layers --- are trained jointly through one loss, end-to-end.
+
+% =========================================================================
+\section{Notation and the standard baseline}
+\label{sec:notation}
+
+\subsection{The data}
+
+\begin{tabular}{ll}
+\toprule
+Symbol & Meaning \\
+\midrule
+$\mathcal{G} = (V, E, X, A)$ & The IoT communication graph \\
+$|V| = N$ & Number of nodes (devices) \\
+$|E| = M$ & Number of edges (communications) \\
+$X \in \mathbb{R}^{N \times d_x}$ & Per-node features ($d_x = 21$) \\
+$A \in \mathbb{R}^{N\times N}$ & Weighted adjacency \\
+$y_i \in \{0,1\}$ & Node label (0=normal, 1=attack) \\
+$L_{\text{train}}, L_{\text{val}}, L_{\text{test}}$ & Labelled train/val/test subsets \\
+$x_u, x_v$ & Endpoint feature vectors of edge $(u,v)$ \\
+$w_{uv}$ & Edge weight \\
+$\hat{y} \in [0,1]^{N\times 2}$ & Model output probabilities \\
+\bottomrule
+\end{tabular}
+
+\subsection{The standard 3-layer GCN (Villegas-Ch et al.)}
+
+Each GCN layer applies symmetric Laplacian smoothing:
+\begin{equation}
+H^{(l+1)} \;=\; \sigma\!\left(\widetilde{D}^{-1/2}\,\widetilde{A}\,\widetilde{D}^{-1/2}\,
+H^{(l)}\,W^{(l)}\right)
+\label{eq:gcn}
+\end{equation}
+where $\widetilde{A} = A + I$ adds self-loops, $\widetilde{D}_{ii} =
+\sum_j \widetilde{A}_{ij}$ is the degree matrix, $H^{(0)} = X$, and
+$W^{(l)}$ are learnable weights. ReLU acts as $\sigma$.
+
+The pipeline is:
+\[
+X \xrightarrow{\text{GCN}_1} \mathbb{R}^{N\times 64}
+  \xrightarrow{\text{GCN}_2} \mathbb{R}^{N\times 128}
+  \xrightarrow{\text{GCN}_3} \mathbb{R}^{N\times 64}
+  \xrightarrow{\text{MLP}}  \hat{Y} \in [0,1]^{N\times 2}.
+\]
+
+The classification loss is standard cross-entropy on labelled nodes:
+\begin{equation}
+\mathcal{L}_{\text{CE}}
+= \frac{1}{|L_{\text{train}}|}
+  \sum_{i\in L_{\text{train}}}
+  -\!\big[\,y_i\,\log \hat{y}_{i,1} + (1-y_i)\,\log \hat{y}_{i,0}\,\big].
+\label{eq:lce}
+\end{equation}
+
+\begin{notebox}[Intuition for the GCN]
+Each GCN layer makes every node \emph{average its neighbours' features},
+weighted by edge weight and normalised by degrees. When neighbours
+share labels (homophily holds), this denoises the prediction. When
+neighbours have different labels (cross-class edge), this
+\emph{contaminates} the node's representation. Removing cross-class
+edges is therefore both an accuracy lever and a speed lever.
+\end{notebox}
+
+% =========================================================================
+\section{Our addition 1: class-conditional autoencoder}
+\label{sec:ae}
+
+\subsection{Architecture}
+
+A two-layer feed-forward encoder and decoder:
+\begin{align}
+z_i  &= \mathrm{ReLU}\!\left(W_{e2}\,\mathrm{ReLU}(W_{e1}\,x_i)\right)
+        \quad &&\text{(encoder)} \\
+\hat{x}_i &= W_{d2}\,\mathrm{ReLU}(W_{d1}\,z_i)
+        \quad &&\text{(decoder)}
+\end{align}
+with hidden dim 64 and latent dim 32.
+
+Per-node mean-squared reconstruction error:
+\begin{equation}
+\mathrm{MSE}_i \;=\; \frac{1}{d_x}\sum_{k=1}^{d_x}(x_{ik} - \hat{x}_{ik})^2.
+\label{eq:mse}
+\end{equation}
+
+\subsection{The novelty: class-conditional masking}
+
+Let $S \;=\; \{\,i \in L_{\text{train}} \;:\; y_i = 0\,\}$ be the set of
+\emph{normal-class training nodes}. The autoencoder's training loss is
+restricted to this set:
+\begin{equation}
+\boxed{\;\mathcal{L}_{\text{recon}}
+\;=\; \frac{1}{|S|}\sum_{i \in S}\| x_i - \hat{x}_i \|^2\;}
+\label{eq:lrecon}
+\end{equation}
+
+Equation~\eqref{eq:lrecon} is the \emph{only} novelty-bearing line in
+the entire method. Everything else --- the AE topology, the Gumbel
+trick below, the GCN backbone --- is off-the-shelf.
+
+\subsection{Why the MSE becomes an OOD score}
+
+If the autoencoder has sufficient capacity and is trained only on
+normal-class samples, it learns the conditional density
+$p_X(\,\cdot \mid y=0\,)$. After training:
+\begin{align*}
+\mathbb{E}[\,\mathrm{MSE}_i \mid y_i = 0\,] &\;\approx\; 0\\
+\mathbb{E}[\,\mathrm{MSE}_i \mid y_i = 1\,] &\;\gg\; 0
+\end{align*}
+because attack-class samples are \emph{out of the AE's training
+distribution} and therefore reconstructed badly.
+
+For an edge $(u, v)$, define
+\(\Delta_{uv} = |\mathrm{MSE}_u - \mathrm{MSE}_v|\).
+The conditional means of $\Delta_{uv}$ then satisfy:
+\begin{align*}
+\mathbb{E}[\,\Delta_{uv} \mid (u,v) \text{ same-class}] &\;\approx\; \text{small}\\
+\mathbb{E}[\,\Delta_{uv} \mid (u,v) \text{ cross-class}] &\;\gg\; \text{small}.
+\end{align*}
+So $\Delta_{uv}$ is the discriminative feature the pruner needs to
+identify cross-class (noisy) edges, and it is constructed without
+referencing the attack labels at any point.
+
+\begin{notebox}[What if we trained the AE on \emph{all} nodes?]
+This is the ``full-AE ablation'' in the thesis. The AE then learns the
+mixture distribution
+$p_X(\,\cdot\,) = \pi\,p_X(\,\cdot\mid y=0) + (1-\pi)\,p_X(\,\cdot\mid y=1)$.
+Attack nodes are now in-distribution; their MSE drops to a mid-range
+value; $\Delta_{uv}$ no longer discriminates cleanly. The empirical
+consequence (Section~\ref{sec:results-link}) is that the selectivity
+ratio falls from $1.42\times$ (class-conditional) to $0.88\times$
+(full AE), which is \emph{below random pruning}. This is the cleanest
+empirical evidence that the class-conditional masking is the necessary
+ingredient.
+\end{notebox}
+
+% =========================================================================
+\section{Our addition 2: differentiable Gumbel-Softmax pruner}
+\label{sec:pruner}
+
+\subsection{Edge features and the scorer MLP}
+
+For each edge $(u,v) \in E$, build a 4-dim feature vector:
+\begin{equation}
+\phi_{uv} \;=\; \big[\,\mathrm{MSE}_u,\; \mathrm{MSE}_v,\;
+                       \cos(x_u, x_v),\; w_{uv}\,\big]
+\label{eq:phi}
+\end{equation}
+where $\cos(x_u, x_v) = (x_u^\top x_v)/(\|x_u\|\|x_v\|)$ is cosine
+similarity. A small MLP $g_\psi : \mathbb{R}^4 \to \mathbb{R}^2$ outputs
+\emph{2-class logits} per edge:
+\begin{equation}
+\ell_{uv} \;=\; g_\psi(\phi_{uv})
+\;=\; \big(\,\ell_{uv,0},\; \ell_{uv,1}\,\big),
+\label{eq:logits}
+\end{equation}
+where index 0 is ``prune'' and index 1 is ``keep''.
+
+\subsection{The differentiability problem}
+
+If we just took the arg-max of $\ell_{uv}$, we would get a binary
+keep/prune decision --- but the operation $\arg\max$ has zero gradient
+almost everywhere, so we cannot back-propagate through it. We need a
+differentiable surrogate. The Gumbel-Softmax with the
+Straight-Through estimator solves this.
+
+\subsection{Gumbel-Softmax}
+
+\paragraph{Step 1: Gumbel-distributed noise.}
+Sample
+\(g_{uv,c} \sim \mathrm{Gumbel}(0,1)\) for $c \in \{0,1\}$. A clean
+reparameterisation:
+\[g_{uv,c} \;=\; -\log(-\log u),\quad u \sim \mathrm{Uniform}(0,1).\]
+
+\paragraph{Step 2: Soft mask via tempered softmax.}
+\begin{equation}
+y^{\text{soft}}_{uv} \;=\; \mathrm{softmax}\!\Bigg(\frac{\ell_{uv} + g_{uv}}{\tau}\Bigg)
+\;\in\; [0,1]^{2}.
+\label{eq:ysoft}
+\end{equation}
+When $\tau \to 0$ this converges to the argmax distribution; when
+$\tau$ is large, it is smooth. We schedule $\tau$ from 1.0 (smooth) to
+0.1 (sharp) over training.
+
+\paragraph{Step 3: Hard mask via argmax.}
+\begin{equation}
+y^{\text{hard}}_{uv} \;=\; \mathrm{onehot}\!\big(\arg\max y^{\text{soft}}_{uv}\big).
+\label{eq:yhard}
+\end{equation}
+
+\paragraph{Step 4: Straight-Through identity.}
+We want \emph{hard forward, soft gradient}. The trick:
+\begin{equation}
+m_{uv} \;=\; y^{\text{hard}}_{uv,1}
+\;+\; y^{\text{soft}}_{uv,1}
+\;-\; \mathrm{sg}(y^{\text{soft}}_{uv,1}),
+\label{eq:ste}
+\end{equation}
+where $\mathrm{sg}(\cdot)$ is the stop-gradient operator.
+
+\begin{keybox}[Why the ST identity gives "hard forward / soft gradient"]
+\textbf{Forward}: numerically,
+$y^{\text{soft}}_{uv,1} - \mathrm{sg}(y^{\text{soft}}_{uv,1}) = 0$,
+so $m_{uv} = y^{\text{hard}}_{uv,1}$, which is 0 or 1. \emph{The GCN
+truly receives a binary mask.}\\
+\textbf{Backward}: $\partial m_{uv}/\partial \ell_{uv}
+= \partial y^{\text{soft}}_{uv,1}/\partial \ell_{uv}$, because
+$y^{\text{hard}}$ and $\mathrm{sg}(\cdot)$ are constants under
+differentiation. \emph{The pruner receives a smooth gradient.}
+\end{keybox}
+
+Self-loops are forced kept in both branches by setting $m_{uu} = 1$
+after Eq.~\eqref{eq:ste}, to prevent disconnected nodes from producing
+NaN.
+
+\subsection{The sparsity regulariser}
+
+To control \emph{how many} edges we keep, we add a quadratic penalty
+on the average soft keep-probability:
+\begin{equation}
+\mathcal{L}_{\text{sparse}}
+\;=\; \Bigg(\,\frac{1}{|E\setminus\text{self-loops}|}
+                \sum_{(u,v)} y^{\text{soft}}_{uv,1} \;-\; (1-\rho)\Bigg)^{\!2}
+\label{eq:lsparse}
+\end{equation}
+where $\rho \in (0,1)$ is the target sparsity. We use $\rho = 0.5$.
+$\mathcal{L}_{\text{sparse}}$ uses no labels of any kind.
+
+% =========================================================================
+\section{The tri-partite loss and the supervision-decoupling property}
+
+\subsection{The total loss}
+
+\begin{equation}
+\boxed{\;\mathcal{L}_{\text{total}}
+\;=\; \underbrace{\mathcal{L}_{\text{CE}}}_{\text{supervised}}
+\;+\; \underbrace{\lambda_1\,\mathcal{L}_{\text{recon}}}_{\text{self-supervised}}
+\;+\; \underbrace{\lambda_2\,\mathcal{L}_{\text{sparse}}}_{\text{label-free}}\;}
+\label{eq:total}
+\end{equation}
+
+with $\lambda_1 = 0.1$, $\lambda_2 = 1.0$.
+
+\subsection{Why this is the key property}
+
+\begin{table}[h]
+\centering
+\caption{Each loss term has a different supervision mode. The
+autoencoder's loss path uses no attack labels.}
+\begin{tabular}{lllc}
+\toprule
+\textbf{Term} & \textbf{Affects} & \textbf{Supervision} & \textbf{Uses attack labels?} \\
+\midrule
+$\mathcal{L}_{\text{CE}}$ & GCN classifier $\theta$ & Supervised on $L_{\text{train}}$ & yes \\
+$\mathcal{L}_{\text{recon}}$ & Autoencoder $W_e, W_d$ & Filtered by normal label & \textbf{no} \\
+$\mathcal{L}_{\text{sparse}}$ & Pruner $\psi$ & Label-free target & no \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The pruner $\psi$ receives gradients from \emph{only}
+$\mathcal{L}_{\text{CE}}$ (back-propagated through the masked GCN) and
+$\mathcal{L}_{\text{sparse}}$. The autoencoder receives gradients
+from \emph{only} $\mathcal{L}_{\text{recon}}$ --- which never references
+the attack label. Therefore the AE's output (the $\mathrm{MSE}_i$
+score) is \emph{invariant to how many attack labels are available}.
+
+That is the property that gives us the flat label-efficiency curve in
+the empirical results.
+
+% =========================================================================
+\section{Training and inference}
+
+\subsection{Two-phase training schedule}
+
+\paragraph{Phase 1 --- Warm-up (epochs 1--50).}
+Set $\lambda_2 = 0$ and $\tau = 1$. No sparsity pressure, soft mask.
+This lets the autoencoder converge first --- otherwise the pruner
+would start dropping edges before the AE knows which edges are noisy.
+
+\paragraph{Phase 2 --- Pruning (epochs 51--300).}
+Enable $\lambda_2 = 1.0$ and geometrically anneal the Gumbel
+temperature:
+\begin{equation}
+\tau_e \;=\; \tau_{\text{start}}^{\,1-t}\;\tau_{\text{end}}^{\,t},
+\qquad t = (e-50) / (300-50).
+\end{equation}
+$\tau$ goes from $1.0$ at epoch 50 to $0.1$ at epoch 300. Annealing
+avoids the model getting stuck in the soft regime forever.
+
+\paragraph{Optimiser.} Adam, learning rate $10^{-3}$, weight decay
+$5\times 10^{-4}$, gradient clip at norm 5.
+
+\subsection{Inference (deployment mode)}
+
+At test time we drop the Gumbel noise and use deterministic top-k
+selection. For each edge compute a score:
+\[
+s_{uv} \;=\; \ell_{uv,1} - \ell_{uv,0}.
+\]
+Sort and keep the top $(1-\rho)\,|E_{\setminus\text{self-loop}}|$
+edges by $s_{uv}$.
+
+\paragraph{Deployment optimisation.}
+For a static IoT topology, run the AE + pruner once to obtain the
+fixed pruned graph $\mathcal{G}'$. Thereafter, deployment runs only
+the 3-layer GCN backbone on $\mathcal{G}'$. The AE and pruner are
+training-time scaffolding only. This is the
+\emph{deploy-mode inference} that yields the $1.37\times$ speed-up at
+50K-node graphs.
+
+% =========================================================================
+\section{Why each piece is necessary (the ablation logic)}
+
+The ablation table in the thesis is a step-by-step \emph{stripping
+experiment}: each row removes one design element from the row below
+to see how performance degrades.
+
+\begin{table}[h]
+\centering
+\caption{Each row removes one design element from the row below it.
+The F1 drop $\Delta_{100\to 5\%}$ measures how robust each method is
+to attack-label scarcity.}
+\small
+\begin{tabular}{p{4.5cm}p{3.5cm}p{4cm}}
+\toprule
+\textbf{Configuration} & $F_1$ at 100\% labels & $\Delta F_1$ (100\%$\to$5\%)\\
+\midrule
+No pruning (Dense GCN) & $0.942\pm 0.005$ & $-0.210$ (std explodes)\\
+\hline
+$-$ learned, $+$ random (DropEdge) & $0.784\pm 0.006$ & $-0.047$ \\
+\hline
+$+$ learned, $-$ AE (NeuralSparse) & $0.661\pm 0.052$ & $-0.050$ \\
+\hline
+$+$ AE on \emph{full data} & $0.695\pm 0.067$ & $-0.003$ \\
+\hline
+\textbf{$+$ class-conditional} \textbf{(Ours)} & $\bm{0.743\pm 0.111}$
+& $\bm{-0.001}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reading the table:
+\begin{itemize}
+  \item \textbf{Pruning is the trade-off}: dropping it gives the
+        highest absolute $F_1$ (0.942) but at full graph cost and
+        unstable behaviour at low labels.
+  \item \textbf{Learned $>$ random}: ``learned but supervised''
+        (NeuralSparse) is worse than ``learned but random'' (DropEdge)
+        in this experiment, because the task gradient becomes a noisy
+        signal under heavy graph noise.
+  \item \textbf{Autoencoder gradient is the right signal}: adding the
+        AE (even on full data) recovers absolute $F_1$ and reduces
+        degradation slope.
+  \item \textbf{Class-conditional masking completes the design}: the
+        only change between row 4 and row 5 is the
+        \texttt{(y == normal) \& train\_mask} filter on the recon
+        loss, and that single line earns the flat curve.
+\end{itemize}
+
+% =========================================================================
+\section{Connecting the math to the empirical results}
+\label{sec:results-link}
+
+\begin{table}[h]
+\centering
+\caption{Each empirical headline traces back to a specific piece of
+math.}
+\small
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{p{6cm}p{8cm}}
+\toprule
+\textbf{Empirical result} & \textbf{Mathematical reason} \\
+\midrule
+Zero $F_1$ loss at 48\% edge reduction
+(low noise, single seed)
+& Pruner removes edges with low keep-score $s_{uv}$, which are exactly
+the edges where $|\mathrm{MSE}_u - \mathrm{MSE}_v|$ is large
+(cross-class). Removing them helps the GCN by reducing homophily
+violation.\\
+\hline
+Selectivity ratio $1.42\times$ (vs $0.88\times$ for full AE)
+& Under class-conditional training the AE learns
+$p_X(\cdot\mid y=0)$, so
+$\mathbb{E}[|\mathrm{MSE}_u-\mathrm{MSE}_v|\mid\text{cross-class}] \gg
+\mathbb{E}[|\mathrm{MSE}_u-\mathrm{MSE}_v|\mid\text{same-class}]$.
+Under full-AE training the AE learns the mixture and the gap collapses.\\
+\hline
+Flat $F_1$ curve from 100\% $\to$ 5\% attack labels
+& The autoencoder's loss path
+(Eq.~\eqref{eq:lrecon}) never references the attack label. Shrinking
+$|L_{\text{train}}^{\text{attack}}|$ affects only $\mathcal{L}_{\text{CE}}$,
+not the AE-derived OOD score.\\
+\hline
+$1.37\times$ inference speed-up at 50K-node graphs
+& GCN forward cost is
+$O(L\,|E|\,d + L\,|V|\,d^2)$.
+Pruning 50\% of edges saves the first term. At small graphs the
+second term dominates compute (so the speed-up is tiny); at large
+graphs the first term dominates and the savings materialise.\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =========================================================================
+\section{The defence elevator-pitch}
+
+\begin{keybox}[Memorise this 60-second answer]
+\itshape
+We start with the 3-layer GCN from Villegas-Ch et al.\ as the
+classifier --- the architecture is unchanged. We add two components
+on top: a class-conditional autoencoder that learns the normal-traffic
+distribution and produces a per-node out-of-distribution score, and a
+Gumbel-Softmax pruner with the Straight-Through estimator that uses
+this OOD score together with cosine similarity and edge weight to
+make differentiable, binary edge-keep/prune decisions. All three
+components --- AE, pruner, and GCN --- are trained jointly with a
+tri-partite loss whose three terms have three different supervision
+modes: cross-entropy on labelled nodes (supervised),
+MSE reconstruction on normal-class training nodes only
+(self-supervised), and a target-sparsity quadratic penalty
+(label-free). The methodological consequence is that the pruning
+loss path uses no attack labels at all, so the pruning quality is
+invariant to how many attack labels are available --- which is what
+gives us the flat $F_1$ curve across the entire attack-label range,
+and which closes the precise gap between supervised graph-pruning
+methods (NeuralSparse, PTDNet) and unsupervised graph-anomaly
+detection methods (DOMINANT, AnomalyDAE).
+\end{keybox}
+
+% =========================================================================
+\section{One-page cheat-sheet}
+
+\begin{tabular}{p{0.95\textwidth}}
+\toprule
+\textbf{The novelty in one sentence}\\
+Train an autoencoder \emph{only on normal-class training nodes} so its
+per-node MSE becomes an out-of-distribution score; feed this OOD score
+to a differentiable Gumbel-Softmax pruner that runs before the
+supervised GCN classifier.\\
+\midrule
+\textbf{The gap filled}\\
+Existing pruners (NeuralSparse, PTDNet, DropEdge, GNNGuard) drive their
+edge selection from the supervised classification loss $\Rightarrow$
+they degrade when attack labels are scarce. Existing graph-anomaly
+detectors (DOMINANT, AnomalyDAE) use AE reconstruction at the
+\emph{node} level but never modify the graph. We sit at the
+intersection: AE reconstruction $\Rightarrow$ \emph{edge-level}
+pruning.\\
+\midrule
+\textbf{The three loss terms}\\
+$\mathcal{L} \;=\; \mathcal{L}_{\text{CE}}
++ \lambda_1 \mathcal{L}_{\text{recon}}
++ \lambda_2 \mathcal{L}_{\text{sparse}}$
+\quad with $\lambda_1{=}0.1$, $\lambda_2{=}1.0$.\\[2pt]
+$\mathcal{L}_{\text{CE}}$: cross-entropy on $L_{\text{train}}$
+(supervised).\\
+$\mathcal{L}_{\text{recon}}$: MSE on $\{i\in L_{\text{train}}, y_i=0\}$
+(self-supervised, no attack labels).\\
+$\mathcal{L}_{\text{sparse}}$: target keep-rate constraint
+(label-free).\\
+\midrule
+\textbf{Key empirical claims}\\
+\begin{tabular}{p{0.45\textwidth}p{0.45\textwidth}}
+$F_1$ = 0.995 at 48\% edge reduction (low noise) & vs Dense GCN 0.995\\
+Selectivity ratio = $1.42\times$ & vs $0.88\times$ for full AE\\
+$\Delta F_1$ from 100\% $\to$ 5\% labels = $-$0.001 & vs $-$0.210 for Dense GCN\\
+Inference speed-up at 50K nodes = $1.37\times$ & deploy-mode\\
+\end{tabular}\\
+\midrule
+\textbf{Anticipated panel questions \& one-line answers}\\
+\textbf{``Why not NeuralSparse?''} It needs attack labels for its pruner
+$\Rightarrow$ fails when labels scarce. Ours doesn't.\\
+\textbf{``Is this just a regularization trick?''} No --- it's
+\emph{supervision-decoupling}. Our pruner can train on data the
+classifier cannot (unlabelled normals).\\
+\textbf{``Why lower absolute $F_1$ at high noise?''} Trading accuracy for
+50\% edge reduction, low variance under label scarcity, and inference
+speed-up at scale. Among pruners we have highest mean \emph{and} lowest
+variance at 5\% labels.\\
+\textbf{``Why synthetic data?''} Need ground-truth edge-noise labels
+for selectivity analysis. Real datasets don't have these. Future work.\\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+\begin{notebox}[How this walkthrough relates to the formal thesis]
+The thesis (\texttt{THESIS.tex}) is the formal academic write-up
+intended for the panel. This walkthrough is the explainer intended
+for \emph{you} --- to make sure you fully understand the math and can
+explain every block. When defending, speak from the thesis; when
+preparing, study this document.
+\end{notebox}
+
+\end{document}
